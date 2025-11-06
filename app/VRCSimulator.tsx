@@ -1,6 +1,33 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image"; // --- IMPORT THE IMAGE COMPONENT ---
+
+// Reusable Modal Component
+const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75 flex justify-center items-center p-4 z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100 opacity-100">
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl font-semibold"
+            aria-label="Close modal"
+          >
+            &times;
+          </button>
+        </div>
+        <div className="p-6 text-gray-800 dark:text-gray-200">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 const getInitialTheme = () => {
   if (typeof window === 'undefined') {
@@ -32,13 +59,18 @@ export default function VRCSimulator() {
   const [isDarkMode, setIsDarkMode] = useState(getInitialTheme);
   const [hasMounted, setHasMounted] = useState(false);
   
-  // --- NEW: State for algorithm toggle ---
   const [showAlgorithm, setShowAlgorithm] = useState(false);
   
+  const [showHowToUseModal, setShowHowToUseModal] = useState(false);
+  const [showDevelopedByModal, setShowDevelopedByModal] = useState(false);
+  const [showLearnModal, setShowLearnModal] = useState(false);
+
+
   const [flippedBitIndex, setFlippedBitIndex] = useState<{frame: number, bit: number} | null>(null);
   const [correctedBitIndices, setCorrectedBitIndices] = useState<number[]>([]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHasMounted(true);
   }, []);
 
@@ -98,7 +130,7 @@ export default function VRCSimulator() {
       const data = frame.slice(0, 8);
       const receivedParity = frame[8];
       
-      const oneCount = data.reduce((a, b) => a + b, 0);
+      const oneCount = data.reduce((a: number, b: number) => a + b, 0);
       const expectedParity = _computeParity(data, parityMode);
       const isError = expectedParity !== receivedParity;
       
@@ -216,23 +248,44 @@ export default function VRCSimulator() {
       <div className="max-w-7xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden transition-colors duration-200">
         <div className="p-6 md:p-8">
           
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
               Vertical Redundancy Check (VRC) Simulator
             </h1>
             
-            <div className="h-10 w-10"> 
-              {hasMounted && (
-                <button
-                  onClick={() => setIsDarkMode(!isDarkMode)}
-                  aria-label="Toggle theme"
-                  className="relative flex items-center justify-center h-10 w-10 p-2 rounded-full text-gray-700 dark:text-gray-200 transition-transform duration-300 ease-in-out hover:scale-110 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="sr-only">Toggle theme</span>
-                  <span className={`absolute inset-0 flex items-center justify-center text-2xl transform transition-all duration-300 ${ isDarkMode ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100' }`} aria-hidden="true" >☀️</span>
-                  <span className={`absolute inset-0 flex items-center justify-center text-2xl transform transition-all duration-300 ${ isDarkMode ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0' }`} aria-hidden="true" >🌙</span>
-                </button>
-              )}
+            <div className="flex flex-wrap gap-2 justify-end items-center">
+              <button
+                onClick={() => setShowHowToUseModal(true)}
+                className="bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded-md shadow-sm font-medium hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+              >
+                How to Use
+              </button>
+              <button
+                onClick={() => setShowDevelopedByModal(true)}
+                className="bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded-md shadow-sm font-medium hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+              >
+                Developed By
+              </button>
+              <button
+                onClick={() => setShowLearnModal(true)}
+                className="bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded-md shadow-sm font-medium hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+              >
+                Learn VRC
+              </button>
+
+              <div className="h-10 w-10 ml-2"> 
+                {hasMounted && (
+                  <button
+                    onClick={() => setIsDarkMode(!isDarkMode)}
+                    aria-label="Toggle theme"
+                    className="relative flex items-center justify-center h-10 w-10 p-2 rounded-full text-gray-700 dark:text-gray-200 transition-transform duration-300 ease-in-out hover:scale-110 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="sr-only">Toggle theme</span>
+                    <span className={`absolute inset-0 flex items-center justify-center text-2xl transform transition-all duration-300 ${ isDarkMode ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100' }`} aria-hidden="true" >☀️</span>
+                    <span className={`absolute inset-0 flex items-center justify-center text-2xl transform transition-all duration-300 ${ isDarkMode ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0' }`} aria-hidden="true" >🌙</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -270,13 +323,12 @@ export default function VRCSimulator() {
             </div>
           </div>
 
-          {/* --- UPDATED: Added Show Algorithm Button --- */}
           <div className="flex flex-wrap gap-3 mb-6">
             <button
               className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md font-medium transform transition-all duration-200 hover:bg-blue-700 hover:scale-105 active:scale-95"
               onClick={generateRandomFrames}
             >
-              Generate Random Frames
+              Generate Random Frames (Sender)
             </button>
             <button
               className="bg-yellow-500 text-white px-4 py-2 rounded-md shadow-md font-medium transform transition-all duration-200 hover:bg-yellow-600 hover:scale-105 active:scale-95"
@@ -308,7 +360,6 @@ export default function VRCSimulator() {
             </button>
           </div>
           
-          {/* --- NEW: Algorithm Display Box --- */}
           {showAlgorithm && (
             <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border dark:border-gray-700">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3">How VRC (Parity Check) Works</h3>
@@ -402,7 +453,7 @@ export default function VRCSimulator() {
                   className={`mt-4 p-4 rounded-lg text-center font-semibold text-lg ${
                     detectionResult === 'success'
                       ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200'
-                      : 'bg-red-100 text-red-800 dark:bg-red-900/5Code/50 dark:text-red-200'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200'
                   }`}
                 >
                   {errorSummary}
@@ -413,11 +464,152 @@ export default function VRCSimulator() {
         </div>
       </div>
       
-      {/* --- NEW: Footer --- */}
       <footer className="text-center mt-8 pb-4 text-gray-500 dark:text-gray-400 text-sm">
         <p>Devansh Arora - 24BCE5331</p>
         <p>Himalaya Sharma - 24BCE5168</p>
       </footer>
+
+      {/* --- How to Use Modal --- */}
+      <Modal
+        isOpen={showHowToUseModal}
+        onClose={() => setShowHowToUseModal(false)}
+        title="How to Use the VRC Simulator"
+      >
+        <div className="space-y-4">
+          <p>{"Welcome to the Vertical Redundancy Check (VRC) Simulator! This tool helps you understand how VRC works in detecting errors during data transmission."}</p>
+          
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">1. Input 9-Bit Frames:</h3>
+          <p>
+            {"Enter 9-bit binary frames (8 data bits + 1 parity bit) in the text area."}
+            {"Each frame should be separated by a space (e.g., "}<code>010010000 011010011</code>{")."}
+            {"The simulator will automatically validate your input."}
+          </p>
+          
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">2. Select Parity Mode:</h3>
+          <p>
+            {'Choose either "Even Parity" or "Odd Parity" from the dropdown. This mode determines how the receiver expects the parity bit to be calculated.'}
+          </p>
+
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">3. Control Buttons:</h3>
+          <ul className="list-disc list-inside ml-4 space-y-2">
+            <li>
+              <strong>Generate Random Frames:</strong> {"Populates the input with 3 random 9-bit frames based on the current parity mode."}
+            </li>
+            <li>
+              <strong>Simulate 1-Bit Error:</strong> {"Flips a single random bit in one of the existing frames. The flipped bit will be highlighted in "}<span className="text-yellow-500 font-bold">yellow</span>.
+            </li>
+            <li>
+              <strong>Correct Parity Bits:</strong> {"Recalculates and sets the correct parity bit for each frame based on the selected mode. Corrected parity bits will be highlighted in "}<span className="text-purple-500 font-bold">purple</span>.
+            </li>
+            <li>
+              <strong>Show VRC Algorithm:</strong> {"Toggles a detailed text explanation of the VRC process."}
+            </li>
+            <li>
+              <strong>Check Frames (Receiver):</strong> {"This is the main action. It performs the VRC check on all input frames and displays:"}
+              <ul className="list-disc list-inside ml-4">
+                <li>{"A table showing each received frame and its detection status (OK or Error)." }</li>
+                <li>{"A detailed \"Detection Procedure Log\" for each frame, explaining the calculation step-by-step."}</li>
+                <li>{"An overall summary of detected errors."}</li>
+              </ul>
+            </li>
+          </ul>
+
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">4. Dark Mode Toggle:</h3>
+          <p>
+            {"Use the ☀️/🌙 button on the top right to switch between light and dark themes."}
+          </p>
+
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">5. Understanding the Results:</h3>
+          <p>
+            {"Pay attention to the \"Detection Procedure Log\" to see why an error was or wasn't detected."}
+            {"Remember, VRC can detect single-bit errors and odd numbers of errors, but it cannot detect an even number of errors."}
+          </p>
+        </div>
+      </Modal>
+
+      {/* --- Developed By Modal --- */}
+      <Modal
+        isOpen={showDevelopedByModal}
+        onClose={() => setShowDevelopedByModal(false)}
+        title="Developed By"
+      >
+        <div className="space-y-6">
+          <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900">
+            <h3 className="text-lg font-semibold mb-2">NAME - REG.NO.</h3>
+            <ul className="list-disc list-inside ml-4 space-y-1">
+              <li>Devansh Arora - 24BCE5331</li>
+              <li>Himalaya Sharma - 24BCE5168</li>
+            </ul>
+          </div>
+          
+          <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 flex items-center space-x-4">
+            {/* --- THIS IS THE FIXED IMAGE --- */}
+            <Image
+              src="/guide-photo.jpg" 
+              alt="Guide's Photo"
+              width={96} // w-24 (24 * 4 = 96)
+              height={96} // h-24 (24 * 4 = 96)
+              className="rounded-md object-cover flex-shrink-0"
+            />
+            <div>
+              <h3 className="text-lg font-semibold mb-1">Guided By:</h3>
+              <p className="text-gray-700 dark:text-gray-300">Dr. Swaminathan Annadurai</p>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* --- Learn VRC Modal --- */}
+      <Modal
+        isOpen={showLearnModal}
+        onClose={() => setShowLearnModal(false)}
+        title="Learn More About VRC (Vertical Redundancy Check)"
+      >
+        <div className="space-y-6">
+          <p>
+            {"Vertical Redundancy Check (VRC), also known as Parity Check, is a simple error detection method used in digital communication."}
+            {"It works by adding an extra bit, called a parity bit, to a block of data. The value of this parity bit is chosen"}
+            {"to make the total number of '1's in the data block (including the parity bit) either even or odd, depending on the agreed-upon parity scheme."}
+          </p>
+          <p>
+            {"At the receiving end, the same calculation is performed. If the calculated parity matches the received parity bit,"}
+            {"it's assumed that the data has been transmitted correctly. If they don't match, an error is detected."}
+            {"VRC can detect all single-bit errors and any odd number of errors, but it cannot detect an even number of errors."}
+          </p>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Animations & Tutorials:</h3>
+            <ul className="list-disc list-inside ml-4 space-y-2">
+              <li>
+                <a href="https://www.youtube.com/watch?v=your_vrc_animation_link_1" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                  {"VRC Explained (Animation Example 1) - [Replace with actual link]"}
+                </a>
+              </li>
+              <li>
+                <a href="https://www.youtube.com/watch?v=your_vrc_tutorial_link_2" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                  {"Detailed VRC Tutorial (Example 2) - [Replace with actual link]"}
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">References:</h3>
+            <ul className="list-disc list-inside ml-4 space-y-2">
+              <li>
+                <a href="https://en.wikipedia.org/wiki/Parity_bit" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                  {"Wikipedia: Parity bit"}
+                </a>
+              </li>
+              <li>
+                <a href="https://www.geeksforgeeks.org/vertical-redundancy-check-vrc/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                  {"GeeksforGeeks: Vertical Redundancy Check (VRC)"}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
