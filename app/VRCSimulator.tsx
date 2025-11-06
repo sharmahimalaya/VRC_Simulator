@@ -581,13 +581,13 @@ export default function VRCSimulator() {
             <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Animations & Tutorials:</h3>
             <ul className="list-disc list-inside ml-4 space-y-2">
               <li>
-                <a href="https://www.youtube.com/watch?v=your_vrc_animation_link_1" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                  {"VRC Explained (Animation Example 1) - [Replace with actual link]"}
+                <a href="https://youtu.be/UwERCzJv-y8?si=2MfQk52MpQcClHw9" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                  {"Detailed VRC Explaination"}
                 </a>
               </li>
               <li>
-                <a href="https://www.youtube.com/watch?v=your_vrc_tutorial_link_2" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                  {"Detailed VRC Tutorial (Example 2) - [Replace with actual link]"}
+                <a href="https://youtu.be/qUGudpkLS_k?si=_HXaPFnWIoLZ-RoV" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                  {"Short VRC tutorial"}
                 </a>
               </li>
             </ul>
