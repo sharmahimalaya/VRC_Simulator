@@ -22,7 +22,13 @@ jobs:
           cache: 'npm'
 
       - run: npm ci
-      - run: npm run build       # this will create ./out
+      - run: npm run build 
+      - run: |
+          echo "Listing project root after build - "
+          ls -la
+          echo "Trying to list ./out directory..."
+          ls -la out || echo "❌ ./out not found"
+    # this will create ./out
 
       - name: Check build output
         run: ls -la out
