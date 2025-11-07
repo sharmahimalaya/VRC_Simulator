@@ -3,6 +3,8 @@ const nextConfig = {
   output: 'export',
   images: {
     unoptimized: true,
+    loader: 'custom',
+    loaderFile: './image-loader.js',
   },
   basePath: '/VRC_Simulator',
   assetPrefix: '/VRC_Simulator',
