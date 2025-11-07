@@ -600,39 +600,68 @@ export default function VRCSimulator() {
         </div>
       </Modal>
 
-      {/* --- Developed By Modal --- */}
+      {/* --- UPDATED: Developed By Modal --- */}
       <Modal
         isOpen={showDevelopedByModal}
         onClose={() => setShowDevelopedByModal(false)}
         title="Developed By"
       >
         <div className="space-y-6">
-          <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900">
+          <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 space-y-4">
             <h3 className="text-lg font-semibold mb-2">NAME - REG.NO.</h3>
-            <ul className="list-disc list-inside ml-4 space-y-1">
-              <li>Devansh Arora - 24BCE5331</li>
-              <li>Himalaya Sharma - 24BCE5168</li>
-            </ul>
+            
+            
+
+            {/* --- Himalaya --- */}
+            <div className="flex items-center space-x-4">
+              <Image
+                src="/himalaya.png" // <-- Add 'himalaya.png' to your /public folder
+                alt="Himalaya Sharma"
+                width={80} // w-20
+                height={80} // h-20
+                className="rounded-full object-cover flex-shrink-0"
+              />
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-gray-100">Himalaya Sharma</p>
+                <p className="text-gray-700 dark:text-gray-300">24BCE5168</p>
+              </div>
+            </div>
+
+            {/* --- Devansh --- */}
+            <div className="flex items-center space-x-4">
+              <Image
+                src="/devansh.png" // <-- Add 'devansh.png' to your /public folder
+                alt="Devansh Arora"
+                width={80} // w-20
+                height={80} // h-20
+                className="rounded-full object-cover flex-shrink-0"
+              />
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-gray-100">Devansh Arora</p>
+                <p className="text-gray-700 dark:text-gray-300">24BCE5331</p>
+              </div>
+            </div>
           </div>
+
+          
           
           <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 flex items-center space-x-4">
             <Image
               src="/guide-photo.jpg" // <-- Make sure 'guide-photo.png' is in your /public folder
               alt="Guide's Photo"
-              width={96} // w-24 (24 * 4 = 96)
-              height={96} // h-24 (24 * 4 = 96)
+              width={96} // w-24
+              height={96} // h-24
               className="rounded-md object-cover flex-shrink-0"
             />
             <div>
               <h3 className="text-lg font-semibold mb-1">Guided By:</h3>
-              {/* --- FIXED: Wrapped in {} --- */}
               <p className="text-gray-700 dark:text-gray-300"> {"Dr. Swaminathan Annadurai"}</p>
             </div>
           </div>
         </div>
       </Modal>
 
-      {/* --- UPDATED: Learn VRC Modal with More Content --- */}
+      {/* --- Learn VRC Modal --- */}
       <Modal
         isOpen={showLearnModal}
         onClose={() => setShowLearnModal(false)}
