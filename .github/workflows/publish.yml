@@ -1,8 +1,8 @@
-name: Deploy to GitHub Pages
+name: Deploy Next.js Static Site to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]   # Change to your default branch if different
   workflow_dispatch:
 
 permissions:
@@ -10,34 +10,42 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  GITHUB_PAGES: true   # Enables basePath/assetPrefix in next.config.ts
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+    steps:
+      - name: Checkout Repository 🛎️
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ⚙️
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
 
-      - run: npm ci
-      - run: npm run build 
-      - run: |
-          echo "Listing project root after build - "
+      - name: Install Dependencies 🔧
+        run: npm ci
+
+      - name: Build Next.js App 🏗️
+        run: |
+          npm run build      # Runs next build
+          npx next export    # Runs static export -> ./out
+
+      - name: Debug Export Output 📂
+        run: |
+          echo "Listing root directory:"
           ls -la
-          echo "Trying to list ./out directory..."
+          echo "Listing ./out directory:"
           ls -la out || echo "❌ ./out not found"
-    # this will create ./out
 
-      - name: Check build output
-        run: ls -la out
-
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload GitHub Pages Artifact 📡
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
-          name: github-pages
-          retention-days: 1
 
   deploy:
     needs: build
@@ -46,5 +54,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
+      - name: Deploy to GitHub Pages 🚀
+        id: deployment
         uses: actions/deploy-pages@v4
