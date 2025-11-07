@@ -615,7 +615,7 @@ export default function VRCSimulator() {
             {/* --- Himalaya --- */}
             <div className="flex items-center space-x-4">
               <Image
-                src="/himalaya.png"
+                src="himalaya.png"
                 alt="Himalaya Sharma"
                 width={80}
                 height={80}
@@ -630,7 +630,7 @@ export default function VRCSimulator() {
             {/* --- Devansh --- */}
             <div className="flex items-center space-x-4">
               <Image
-                src="/devansh.png"
+                src="devansh.png"
                 alt="Devansh Arora"
                 width={80}
                 height={80}
@@ -647,7 +647,7 @@ export default function VRCSimulator() {
           
           <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 flex items-center space-x-4">
             <Image
-              src="/guide-photo.jpg"
+              src="guide-photo.jpg"
               alt="Guide's Photo"
               width={96} // w-24
               height={96} // h-24
