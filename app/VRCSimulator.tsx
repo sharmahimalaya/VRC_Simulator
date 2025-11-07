@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import Image from "next/image"; // --- IMPORT THE IMAGE COMPONENT ---
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
+import { saveAs } from "file-saver";
 
 // Reusable Modal Component
 const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }) => {
@@ -9,8 +11,8 @@ const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean; onClose:
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75 flex justify-center items-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100 opacity-100">
-        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100 opacity-100">
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
           <button
             onClick={onClose}
@@ -224,6 +226,71 @@ export default function VRCSimulator() {
     setReceivedFrames(correctedFrames); 
   };
   
+  const downloadLogAsDocx = () => {
+    if (detectionLog.length === 0 || !errorSummary) {
+      alert("Please run 'Check Frames' first to generate a log.");
+      return;
+    }
+
+    const paragraphs: Paragraph[] = [];
+
+    paragraphs.push(
+      new Paragraph({
+        text: "VRC Detection Procedure Log",
+        heading: HeadingLevel.HEADING_1,
+        spacing: { after: 240 },
+      })
+    );
+
+    detectionLog.forEach(log => {
+      const lines = log.split('\n');
+      
+      if (lines[0]) {
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: lines[0], bold: true })],
+            spacing: { after: 120 },
+          })
+        );
+      }
+      
+      lines.slice(1).forEach(line => {
+        paragraphs.push(
+          new Paragraph({
+            text: line,
+            indent: { left: 720 }, // 720 twips = 0.5 inch
+          })
+        );
+      });
+
+      paragraphs.push(new Paragraph(""));
+    });
+
+    paragraphs.push(
+      new Paragraph({
+        text: "Final Summary:",
+        heading: HeadingLevel.HEADING_2,
+        spacing: { before: 240, after: 120 },
+      })
+    );
+    paragraphs.push(
+      new Paragraph({
+        text: errorSummary,
+      })
+    );
+
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: paragraphs,
+      }],
+    });
+
+    Packer.toBlob(doc).then(blob => {
+      saveAs(blob, "vrc-detection-log.docx");
+    });
+  };
+  
   const getBitClass = (bit: number, frameIdx: number, bitIdx: number): string => {
     const isFlipped = flippedBitIndex?.frame === frameIdx && flippedBitIndex?.bit === bitIdx;
     const isCorrected = correctedBitIndices.includes(frameIdx) && bitIdx === 8;
@@ -271,6 +338,12 @@ export default function VRCSimulator() {
                 className="bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded-md shadow-sm font-medium hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
               >
                 Learn VRC
+              </button>
+              <button
+                onClick={downloadLogAsDocx}
+                className="bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded-md shadow-sm font-medium hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+              >
+                Download
               </button>
 
               <div className="h-10 w-10 ml-2"> 
@@ -543,9 +616,8 @@ export default function VRCSimulator() {
           </div>
           
           <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 flex items-center space-x-4">
-            {/* --- THIS IS THE FIXED IMAGE --- */}
             <Image
-              src="/guide-photo.jpg" 
+              src="/guide-photo.jpg" // <-- Make sure 'guide-photo.png' is in your /public folder
               alt="Guide's Photo"
               width={96} // w-24 (24 * 4 = 96)
               height={96} // h-24 (24 * 4 = 96)
@@ -553,53 +625,91 @@ export default function VRCSimulator() {
             />
             <div>
               <h3 className="text-lg font-semibold mb-1">Guided By:</h3>
-              <p className="text-gray-700 dark:text-gray-300">Dr. Swaminathan Annadurai</p>
+              {/* --- FIXED: Wrapped in {} --- */}
+              <p className="text-gray-700 dark:text-gray-300"> {"Dr. Swaminathan Annadurai"}</p>
             </div>
           </div>
         </div>
       </Modal>
 
-      {/* --- Learn VRC Modal --- */}
+      {/* --- UPDATED: Learn VRC Modal with More Content --- */}
       <Modal
         isOpen={showLearnModal}
         onClose={() => setShowLearnModal(false)}
         title="Learn More About VRC (Vertical Redundancy Check)"
       >
         <div className="space-y-6">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Concept of Parity Checking</h3>
           <p>
-            {"Vertical Redundancy Check (VRC), also known as Parity Check, is a simple error detection method used in digital communication."}
-            {"It works by adding an extra bit, called a parity bit, to a block of data. The value of this parity bit is chosen"}
-            {"to make the total number of '1's in the data block (including the parity bit) either even or odd, depending on the agreed-upon parity scheme."}
+            {"Vertical Redundancy Check (VRC), also known as a single-bit parity check, is the simplest form of error detection. As discussed in networking textbooks like "}<strong className="text-gray-900 dark:text-gray-100">{"Kurose & Ross, \"Computer Networking: A Top-Down Approach,\""}</strong>{", it's a form of in-band error control that operates at the link layer."}
           </p>
           <p>
-            {"At the receiving end, the same calculation is performed. If the calculated parity matches the received parity bit,"}
-            {"it's assumed that the data has been transmitted correctly. If they don't match, an error is detected."}
-            {"VRC can detect all single-bit errors and any odd number of errors, but it cannot detect an even number of errors."}
+            {"The core idea is to add a single bit (the parity bit) to a block of data (e.g., an 8-bit byte). The sender sets this bit to 1 or 0 to ensure the total number of '1's in the resulting frame is either even (for Even Parity) or odd (for Odd Parity)."}
           </p>
 
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">How VRC Works (Sender vs. Receiver)</h3>
+          <ul className="list-disc list-inside ml-4 space-y-2">
+            <li>
+              <strong>{"Sender's Role:"}</strong>
+              <p className="ml-4">{"The sender takes the data (e.g., 8 bits), counts the number of 1s, and appends the correct parity bit to create the transmittable frame (9 bits)."}</p>
+              <ul className="list-disc list-inside ml-10 mt-1">
+                <li><strong>Even Parity Example:</strong> {"Data is"} <code>10110010</code> {"(has 4 ones). Since 4 is already even, the sender adds a"} <code>0</code>. {"The frame sent is"} <code>101100100</code>.</li>
+                <li><strong>Odd Parity Example:</strong> {"Data is"} <code>10110010</code> {"(has 4 ones). To make the total (5) odd, the sender adds a"} <code>1</code>. {"The frame sent is"} <code>101100101</code>.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>{"Receiver's Role:"}</strong>
+              <p className="ml-4">{"The receiver gets the full frame (9 bits). It separates the data (8 bits) from the received parity bit. It then re-calculates its own 'expected' parity from the 8 data bits and compares it to the received parity bit."}</p>
+              <ul className="list-disc list-inside ml-10 mt-1">
+                <li>If they match, the frame is assumed to be <strong>OK</strong>.</li>
+                <li>If they do not match, the frame is flagged as an <strong>ERROR</strong>.</li>
+              </ul>
+            </li>
+          </ul>
+          
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Key Limitations</h3>
+          <p>
+            <strong>Inability to Detect Even-Bit Errors:</strong> {"As Kurose & Ross note, a single-bit parity check can only detect single-bit errors (and any odd number of errors). If two bits (or any even number of bits) are flipped during transmission, the parity will still appear correct, and the error will go undetected."}
+          </p>
+          <p>
+            {"For example, if `101100100` (even parity) is sent and corrupted to `101000100` (two bits flipped), the receiver will still count 4 ones and assume the frame is correct. This is why VRC is considered weak and often combined with other methods (like LRC - Longitudinal Redundancy Check) or superseded by more robust methods like Checksums and Cyclic Redundancy Checks (CRC) for critical applications."}
+          </p>
+          
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Beyond VRC: Two-Dimensional Parity (LRC)</h3>
+          <p>
+            {"Because VRC is unreliable for 'burst errors' (multiple bit flips), it is often combined with a"} <strong>Longitudinal Redundancy Check (LRC)</strong> {"to create a two-dimensional parity check."}
+          </p>
+          <p>{"Imagine stacking the data bytes on top of each other in a table:"}</p>
+          <ul className="list-disc list-inside ml-4 space-y-2">
+            <li><strong>VRC (Vertical):</strong> {"A parity bit is calculated for each *byte* (the row). This is what our simulator does."}</li>
+            <li><strong>LRC (Longitudinal):</strong> {"A final, new byte (called the 'checksum' or 'LRC byte') is created by calculating the parity for each *bit column* (e.g., all the 1st bits, all the 2nd bits, etc.)."}</li>
+          </ul>
+          <p>
+            {"This 2D grid allows the receiver to not only *detect* most multi-bit errors but also, in many cases, *correct* the single bit error by finding the exact (row, column) intersection that failed both checks."}
+          </p>
+
+
           <div>
-            <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Animations & Tutorials:</h3>
-            <ul className="list-disc list-inside ml-4 space-y-2">
-              <li>
-                <a href="https://www.youtube.com/watch?v=your_vrc_animation_link_1" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                  {"VRC Explained (Animation Example 1) - [Replace with actual link]"}
-                </a>
-              </li>
-              <li>
-                <a href="https://www.youtube.com/watch?v=your_vrc_tutorial_link_2" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                  {"Detailed VRC Tutorial (Example 2) - [Replace with actual link]"}
-                </a>
-              </li>
-            </ul>
+            <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Animation & Tutorial (Video):</h3>
+            <div className="rounded-lg overflow-hidden border dark:border-gray-700">
+              <iframe 
+                width="100%" 
+                height="415" 
+                src="https://www.youtube.com/embed/UwERCzJv-y8?si=si9QwXikc0XOjva-" 
+                title="YouTube video player: Parity Bit Explained" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen
+                className="w-full"
+              ></iframe>
+            </div>
           </div>
 
           <div>
             <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">References:</h3>
             <ul className="list-disc list-inside ml-4 space-y-2">
-              <li>
-                <a href="https://en.wikipedia.org/wiki/Parity_bit" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                  {"Wikipedia: Parity bit"}
-                </a>
+              <li className="text-gray-700 dark:text-gray-300">
+                <strong>Kurose, J. F., & Ross, K. W. (2017). *Computer Networking: A Top-Down Approach* (6th ed.). Pearson Education.</strong> (See Chapter 6: The Link Layer and LANs)
               </li>
               <li>
                 <a href="https://www.geeksforgeeks.org/vertical-redundancy-check-vrc/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
