@@ -2,7 +2,7 @@ name: Deploy Next.js Static Site to GitHub Pages
 
 on:
   push:
-    branches: [main]   # Change to your default branch if different
+    branches: [main]   # Change to your default branch if needed
   workflow_dispatch:
 
 permissions:
@@ -30,17 +30,17 @@ jobs:
       - name: Install Dependencies 🔧
         run: npm ci
 
-      - name: Build Next.js App 🏗️
+      - name: Build and Export Static Site 🏗️
         run: |
-          npm run build      # Runs next build
-          npx next export    # Runs static export -> ./out
+          npm run build       # Runs next build
+          npx next export     # Generates ./out directory
 
       - name: Debug Export Output 📂
         run: |
           echo "Listing root directory:"
           ls -la
           echo "Listing ./out directory:"
-          ls -la out || echo "❌ ./out not found"
+          ls -la out || echo "❌ ./out directory not found"
 
       - name: Upload GitHub Pages Artifact 📡
         uses: actions/upload-pages-artifact@v3
@@ -53,6 +53,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Deploy to GitHub Pages 🚀
         id: deployment
