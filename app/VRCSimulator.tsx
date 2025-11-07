@@ -615,10 +615,10 @@ export default function VRCSimulator() {
             {/* --- Himalaya --- */}
             <div className="flex items-center space-x-4">
               <Image
-                src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/himalaya.png`} // public asset, prefixed when deployed
+                src="/VRC_Simulator/himalaya.png"
                 alt="Himalaya Sharma"
-                width={80} // w-20
-                height={80} // h-20
+                width={80}
+                height={80}
                 className="rounded-full object-cover flex-shrink-0"
               />
               <div>
@@ -630,10 +630,10 @@ export default function VRCSimulator() {
             {/* --- Devansh --- */}
             <div className="flex items-center space-x-4">
               <Image
-                src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/devansh.png`} // public asset, prefixed when deployed
+                src="/VRC_Simulator/devansh.png"
                 alt="Devansh Arora"
-                width={80} // w-20
-                height={80} // h-20
+                width={80}
+                height={80}
                 className="rounded-full object-cover flex-shrink-0"
               />
               <div>
@@ -647,7 +647,7 @@ export default function VRCSimulator() {
           
           <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 flex items-center space-x-4">
             <Image
-              src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/guide-photo.jpg`} // public asset, prefixed when deployed
+              src="/VRC_Simulator/guide-photo.jpg"
               alt="Guide's Photo"
               width={96} // w-24
               height={96} // h-24
