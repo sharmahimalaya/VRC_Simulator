@@ -1,8 +1,9 @@
-name: Deploy Next.js static export to GitHub Pages
+name: Deploy Next.js App to GitHub Pages
 
 on:
   push:
-    branches: [main]  # change if your main branch is named differently
+    branches:
+      - main  # 🔁 Change this if your default branch is not 'main'
 
 permissions:
   contents: read
@@ -16,26 +17,36 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: 🧾 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: npm ci
 
-      - name: Build Next.js app
+      - name: 🏗️ Build Next.js static site
         run: npm run build
 
-      - name: Upload static site artifact
+      - name: 🧩 Verify build output
+        run: |
+          echo "Listing build output..."
+          ls -al
+          if [ ! -d "out" ]; then
+            echo "❌ ERROR: 'out' folder not found. Make sure 'output: export' is set in next.config.js"
+            exit 1
+          fi
+
+      - name: 📤 Upload static site to Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out  # Next.js static export output
+          path: ./out
 
   deploy:
     runs-on: ubuntu-latest
@@ -43,7 +54,8 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
-      - name: Deploy to GitHub Pages
+      - name: 🚀 Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
