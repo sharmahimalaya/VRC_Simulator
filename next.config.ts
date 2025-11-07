@@ -1,9 +1,14 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: 'export', // 👈 Required for static export (replaces next export)
+import type { NextConfig } from "next";
+
+const isGithubPages = process.env.GITHUB_PAGES === 'true';
+
+const nextConfig: NextConfig = {
+  output: 'export',                     // Enable static site export
   images: {
-    unoptimized: true, // 👈 Optional: prevents Image Optimization API usage (not supported on Pages)
+    unoptimized: true,                  // Required for static export + next/image
   },
+  basePath: isGithubPages ? "/VRC_Simulator" : "",
+  assetPrefix: isGithubPages ? "/VRC_Simulator/" : "",
 };
 
-module.exports = nextConfig;
+export default nextConfig;
